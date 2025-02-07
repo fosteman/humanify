@@ -20,12 +20,20 @@ const convertVoidToUndefined: PluginItem = {
   }
 };
 
+const syntaxErrorPlugin: PluginItem = {
+  visitor: {
+    Program(path) {
+      // Example: this would log an error and allow Babel to continue parsing
+      console.error("Syntax error encountered. skipping", path);
+      path.skip();
+    }
+  }
+};
+
 const flipComparisonsTheRightWayAround: PluginItem = {
   visitor: {
-    // If a variable is compared to a literal, flip the comparison around so that the literal is on the right-hand side
     BinaryExpression(path) {
       const node = path.node;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mappings: any = {
         "==": "==",
         "!=": "!=",
@@ -54,7 +62,6 @@ const flipComparisonsTheRightWayAround: PluginItem = {
 
 const makeNumbersLonger: PluginItem = {
   visitor: {
-    // Convert 5e3 to 5000
     NumericLiteral(path) {
       if (
         typeof path.node.extra?.raw === "string" &&
@@ -74,5 +81,6 @@ export default async (code: string): Promise<string> =>
     convertVoidToUndefined,
     flipComparisonsTheRightWayAround,
     makeNumbersLonger,
-    bautifier
+    bautifier,
+    syntaxErrorPlugin
   ]);
